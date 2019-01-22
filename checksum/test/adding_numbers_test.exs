@@ -1,4 +1,4 @@
-defmodule ChecksumTest do
+defmodule AddingNumbersTest do
   use ExUnit.Case
   use PropCheck
 
@@ -51,11 +51,7 @@ defmodule ChecksumTest do
 
       :ok = numbers |> Enum.each(fn n -> Checksum.Engine.add(pid, n) end)
 
-      joined =
-        numbers
-        |> Enum.filter(fn n -> n >= 0 end)
-        |> Enum.map(fn n -> Integer.to_string(n) end)
-        |> Enum.join()
+      joined = numbers |> TestHelper.join_as_number()
 
       verify(Checksum.Engine.get(pid), joined)
     end

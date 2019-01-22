@@ -4,6 +4,7 @@ defmodule Checksum.Engine do
   """
 
   use GenServer
+  require Integer
 
   # Initialization
 
@@ -23,6 +24,7 @@ defmodule Checksum.Engine do
 
   def clear(pid), do: GenServer.call(pid, :clear)
   def get(pid), do: GenServer.call(pid, :get)
+  def checksum(pid), do: GenServer.call(pid, :checksum)
 
   # Callbacks
 
@@ -35,11 +37,37 @@ defmodule Checksum.Engine do
 
   def handle_call(:clear, _from, _state), do: {:reply, :ok, 0}
 
-  def handle_call(:get, _from, state) do
-    {:reply, state, state}
+  def handle_call(:get, _from, state), do: {:reply, state, state}
+
+  def handle_call(:checksum, _from, state) do
+    {odds, evens} = split(true, state, {0, 0, 0}) |> odds_and_evens()
+    final =
+      (odds * 3 + evens)
+      |> Integer.mod(10)
+      |> calc_final()
+
+    {:reply, final, state}
   end
 
   # Helpers
+
+  defp calc_final(0), do: 0
+  defp calc_final(n) when n < 10, do: 10 - n
+  defp calc_final(_), do: raise("invalid algorithm state")
+
+  defp split(_, 0, acc), do: acc
+  defp split(odd, n, {odds, evens, steps}) do
+    reminder = Integer.mod(n, 10)
+    {odds, evens} = accumulate(odd, reminder, {odds, evens})
+    next_number = Kernel.div((n - reminder), 10)
+    split(not odd, next_number, {odds, evens, steps + 1})
+  end
+
+  defp accumulate(true, n, {odds, evens}), do: {odds + n, evens}
+  defp accumulate(false, n, {odds, evens}), do: {odds, evens + n}
+
+  defp odds_and_evens({odds, evens, steps}) when Integer.is_odd(steps), do: {odds, evens}
+  defp odds_and_evens({odds, evens, _steps}), do: {evens, odds}
 
   # create power_of_ten functions in compile time for calcolus optimization
   @spec power_of_ten(number()) :: number()
