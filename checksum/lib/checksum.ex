@@ -39,15 +39,26 @@ defmodule Checksum.Engine do
 
   def handle_call(:get, _from, state), do: {:reply, state, state}
 
+  # timeout if < 15ms
+  @timeout 15
   def handle_call(:checksum, _from, state) do
-    {odds, evens} = split(true, state, {0, 0, 0}) |> odds_and_evens()
+    task = Task.async(fn -> calc_checksum(state) end)
 
-    final =
-      (odds * 3 + evens)
+    result =
+      case Task.yield(task, @timeout) || Task.shutdown(task, :brutal_kill) do
+        {:ok, res} -> res
+        nil -> {:error, :timeout}
+      end
+
+    {:reply, result, state}
+  end
+
+  defp calc_checksum(number) do
+    {odds, evens} = split(true, number, {0, 0, 0}) |> odds_and_evens()
+
+    (odds * 3 + evens)
       |> Integer.mod(10)
       |> calc_final()
-
-    {:reply, final, state}
   end
 
   # Helpers

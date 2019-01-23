@@ -9,6 +9,15 @@ defmodule ChecksumCalculationTest do
     assert Checksum.Engine.checksum(pid) == 7
   end
 
+  @very_big_number 1..100 |> Enum.reduce(1, fn n, acc -> n * acc end)
+
+  test "add big number and get timeout for checksum" do
+    {:ok, pid} = Checksum.Engine.start_link()
+    1..1000 |> Enum.each(fn _ -> Checksum.Engine.add(pid, @very_big_number) end)
+
+    assert Checksum.Engine.checksum(pid) == {:error, :timeout}
+  end
+
   property "add and get checksum", [:verbose, {:numtests, 10_000}] do
     forall numbers <- list(integer()) do
       {:ok, pid} = Checksum.Engine.start_link()

@@ -39,7 +39,7 @@ def call_c():
 with open("input.txt", "r") as commands:
     for command in commands:
         command = command.strip()
-        log("-{}-".format(command))
+        
         if re.search(a_command_re, command):
             match = re.search(a_command_re, command)
             call_a(match.group(1))

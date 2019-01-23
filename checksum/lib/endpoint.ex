@@ -37,4 +37,5 @@ defmodule Checksum.Endpoint do
 
   defp to_http_res({:ok, data}), do: {200, data}
   defp to_http_res({:error, :invalid_parameters}), do: {400, "invalid parameters"}
+  defp to_http_res({:error, :timeout}), do: {408, "timeout"}
 end
