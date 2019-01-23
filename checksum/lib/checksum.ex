@@ -69,7 +69,7 @@ defmodule Checksum.Engine do
   defp odds_and_evens({odds, evens, steps}) when Integer.is_odd(steps), do: {odds, evens}
   defp odds_and_evens({odds, evens, _steps}), do: {evens, odds}
 
-  # create power_of_ten functions in compile time for calcolus optimization
+  # create power_of_ten functions in compile time for calculus optimization
   @spec power_of_ten(number()) :: number()
   defp power_of_ten(0), do: 10
   1..1000

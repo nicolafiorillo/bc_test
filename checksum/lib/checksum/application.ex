@@ -5,16 +5,26 @@ defmodule Checksum.Application do
 
   use Application
 
-  def start(_type, _args) do
-    # List all child processes to be supervised
-    children = [
-      # Starts a worker by calling: Checksum.Worker.start_link(arg)
-      # {Checksum.Worker, arg},
-    ]
+  @test Application.get_env(:checksum, :test) || false
+  @api_port Application.get_env(:checksum, :api_port)
 
+  def start(_type, _args) do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Checksum.Supervisor]
-    Supervisor.start_link(children, opts)
+    children(@test) |> Supervisor.start_link(opts)
+  end
+
+  def children(true), do: []
+
+  def children(_) do
+    [
+      {Checksum.Engine, [name: :single_engine]},
+      Plug.Cowboy.child_spec(
+        scheme: :http,
+        plug: Checksum.Endpoint,
+        options: [port: @api_port]
+      )
+    ]
   end
 end
