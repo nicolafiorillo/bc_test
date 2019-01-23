@@ -10,8 +10,7 @@ defmodule ChecksumCalculationTest do
   end
 
   property "add and get checksum", [:verbose, {:numtests, 10_000}] do
-
-    forall numbers <- list(integer())  do
+    forall numbers <- list(integer()) do
       {:ok, pid} = Checksum.Engine.start_link()
 
       :ok = numbers |> Enum.each(fn n -> Checksum.Engine.add(pid, n) end)

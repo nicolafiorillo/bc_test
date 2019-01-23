@@ -4,7 +4,9 @@ defmodule Checksum.Endpoint do
   alias Checksum.Api
 
   plug(Plug.Logger)
+
   plug(Plug.Parsers, parsers: [:urlencoded, :multipart, :json], pass: ["*/*"], json_decoder: Jason)
+
   plug(:match)
   plug(:dispatch)
 

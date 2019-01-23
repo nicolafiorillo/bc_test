@@ -29,14 +29,14 @@ defmodule AddingNumbersTest do
     {:ok, pid} = Checksum.Engine.start_link()
     [2, 1, -2, 3, 10, 0] |> Enum.each(fn n -> Checksum.Engine.add(pid, n) end)
 
-    assert Checksum.Engine.get(pid) == 213100
+    assert Checksum.Engine.get(pid) == 213_100
   end
 
   test "add and clear" do
     {:ok, pid} = Checksum.Engine.start_link()
 
     [6, 7, 8, 9, 10] |> Enum.each(fn n -> Checksum.Engine.add(pid, n) end)
-    assert Checksum.Engine.get(pid) == 678910
+    assert Checksum.Engine.get(pid) == 678_910
 
     Checksum.Engine.clear(pid)
 
@@ -45,8 +45,7 @@ defmodule AddingNumbersTest do
   end
 
   property "add and get", [:verbose, {:numtests, 10_000}] do
-
-    forall numbers <- list(integer())  do
+    forall numbers <- list(integer()) do
       {:ok, pid} = Checksum.Engine.start_link()
 
       :ok = numbers |> Enum.each(fn n -> Checksum.Engine.add(pid, n) end)

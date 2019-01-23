@@ -18,7 +18,7 @@ defmodule Checksum.Engine do
 
   # API
 
-  def add(_pid, value) when not is_integer(value), do: IO.inspect {:error, :only_integers}
+  def add(_pid, value) when not is_integer(value), do: {:error, :only_integers}
   def add(_pid, value) when value < 0, do: {:error, :no_negative_values}
   def add(pid, value), do: GenServer.call(pid, {:add, value})
 
@@ -41,6 +41,7 @@ defmodule Checksum.Engine do
 
   def handle_call(:checksum, _from, state) do
     {odds, evens} = split(true, state, {0, 0, 0}) |> odds_and_evens()
+
     final =
       (odds * 3 + evens)
       |> Integer.mod(10)
@@ -56,10 +57,11 @@ defmodule Checksum.Engine do
   defp calc_final(_), do: raise("invalid algorithm state")
 
   defp split(_, 0, acc), do: acc
+
   defp split(odd, n, {odds, evens, steps}) do
     reminder = Integer.mod(n, 10)
     {odds, evens} = accumulate(odd, reminder, {odds, evens})
-    next_number = Kernel.div((n - reminder), 10)
+    next_number = Kernel.div(n - reminder, 10)
     split(not odd, next_number, {odds, evens, steps + 1})
   end
 
@@ -72,15 +74,17 @@ defmodule Checksum.Engine do
   # create power_of_ten functions in compile time for calculus optimization
   @spec power_of_ten(number()) :: number()
   defp power_of_ten(0), do: 10
+
   1..1000
-    |> Enum.each(fn n ->
-      quote do
-        defp power_of_ten(unquote(n)) do
-          unquote do
-            String.pad_trailing("1", n + 1, "0") |> String.to_integer()
-          end
+  |> Enum.each(fn n ->
+    quote do
+      defp power_of_ten(unquote(n)) do
+        unquote do
+          String.pad_trailing("1", n + 1, "0") |> String.to_integer()
         end
       end
-    end)
+    end
+  end)
+
   defp power_of_ten(digits), do: String.pad_trailing("1", digits + 1, "0") |> String.to_integer()
 end
