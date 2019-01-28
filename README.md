@@ -6,7 +6,7 @@ In a terminal shell:
 
 ```bash
 git clone https://github.com/nicolafiorillo/bc_test
-cd checksum
+cd bc_test/checksum
 mix deps.get
 mix compile
 mix test
